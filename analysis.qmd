@@ -1,0 +1,476 @@
+---
+title: "Analysis & Insights"
+subtitle: "In-depth Analysis and Key Findings"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+---
+
+## Executive Summary
+
+This analysis reveals critical insights into water point functionality, service delivery, and infrastructure challenges across the surveyed area. The findings provide evidence-based recommendations for improving water access and sustainability.
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(knitr)
+library(DT)
+library(ggplot2)
+library(plotly)
+library(scales)
+
+# Read the processed data
+data <- read_csv("wpf_processed.csv")
+
+# Key metrics for executive summary
+exec_summary <- data %>%
+  summarise(
+    total_points = n(),
+    functional_rate = round(mean(functional_status == "FUNC") * 100, 1),
+    partial_rate = round(mean(functional_status == "PARTIAL") * 100, 1),
+    service_provider_rate = round(mean(has_service_provider == "Yes", na.rm = TRUE) * 100, 1),
+    quality_issues_rate = round(mean(has_quality_issues == "Yes", na.rm = TRUE) * 100, 1)
+  )
+
+cat("**Key Findings:**\n")
+cat(paste("- ", exec_summary$functional_rate, "% of water points are fully functional\n"))
+cat(paste("- ", exec_summary$partial_rate, "% require repairs but remain partially functional\n"))
+cat(paste("- ", exec_summary$service_provider_rate, "% have active service providers\n"))
+cat(paste("- ", exec_summary$quality_issues_rate, "% report water quality concerns\n"))
+```
+
+## 1. Functionality Analysis
+
+### 1.1 Overall Functional Status
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Detailed functional analysis
+func_detailed <- data %>%
+  count(functional_status) %>%
+  mutate(
+    percentage = round(n/sum(n)*100, 1),
+    status_full = case_when(
+      functional_status == "FUNC" ~ "Fully Functional",
+      functional_status == "PARTIAL" ~ "Partially Functional",
+      functional_status == "NOT_FUNC" ~ "Not Functional",
+      functional_status == "ABANDONED" ~ "Abandoned",
+      TRUE ~ functional_status
+    )
+  ) %>%
+  arrange(desc(n))
+
+# Create pie chart
+pie_plot <- ggplot(func_detailed, aes(x = "", y = n, fill = status_full)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start = 0) +
+  theme_void() +
+  labs(title = "Water Point Functional Status Distribution",
+       fill = "Status") +
+  geom_text(aes(label = paste0(percentage, "%")), 
+            position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Set2")
+
+print(pie_plot)
+
+# Summary table
+kable(func_detailed %>% select(Status = status_full, Count = n, Percentage = percentage),
+      caption = "Functional Status Summary")
+```
+
+### 1.2 Functionality Trends Over Time
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Time series analysis
+time_analysis <- data %>%
+  mutate(
+    submit_date = as.Date(submitted_date, format = "%d/%m/%Y"),
+    week = floor(as.numeric(submit_date - min(submit_date, na.rm = TRUE))/7) + 1
+  ) %>%
+  filter(!is.na(submit_date)) %>%
+  group_by(week, functional_status) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(week) %>%
+  mutate(percentage = round(count/sum(count)*100, 1))
+
+if(nrow(time_analysis) > 0) {
+  ggplot(time_analysis, aes(x = week, y = percentage, color = functional_status)) +
+    geom_line(size = 1.2) +
+    geom_point(size = 2) +
+    labs(title = "Functional Status Distribution Over Survey Period",
+         x = "Survey Week",
+         y = "Percentage of Water Points",
+         color = "Functional Status") +
+    theme_minimal() +
+    scale_color_brewer(palette = "Set2") +
+    scale_y_continuous(labels = percent_format(scale = 1))
+}
+```
+
+## 2. Service Provider Analysis
+
+### 2.1 Service Provider Effectiveness
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Service provider effectiveness analysis
+provider_effectiveness <- data %>%
+  filter(has_service_provider == "Yes") %>%
+  pivot_longer(
+    cols = c(has_area_mechanic, has_water_committee, has_community_members, 
+             has_institution, has_private_owner, has_local_govt, has_bush_mechanic),
+    names_to = "provider_type",
+    values_to = "has_provider"
+  ) %>%
+  filter(has_provider == "Yes") %>%
+  mutate(
+    provider_clean = case_when(
+      provider_type == "has_area_mechanic" ~ "Area Mechanic",
+      provider_type == "has_water_committee" ~ "Water Committee",
+      provider_type == "has_community_members" ~ "Community Members",
+      provider_type == "has_institution" ~ "Institution",
+      provider_type == "has_private_owner" ~ "Private Owner",
+      provider_type == "has_local_govt" ~ "Local Government",
+      provider_type == "has_bush_mechanic" ~ "Bush Mechanic",
+      TRUE ~ provider_type
+    )
+  ) %>%
+  group_by(provider_clean, functional_status) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(provider_clean) %>%
+  mutate(
+    total = sum(count),
+    percentage = round(count/total*100, 1)
+  ) %>%
+  filter(total >= 5) # Only show providers with at least 5 water points
+
+ggplot(provider_effectiveness, aes(x = reorder(provider_clean, -total), y = percentage, fill = functional_status)) +
+  geom_col(position = "stack") +
+  labs(title = "Service Provider Effectiveness by Functional Status",
+       x = "Service Provider Type",
+       y = "Percentage of Water Points",
+       fill = "Functional Status") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2")
+```
+
+### 2.2 Service Provider Coverage
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Service provider coverage analysis
+provider_coverage <- data %>%
+  summarise(
+    area_mechanic = sum(has_area_mechanic == "Yes", na.rm = TRUE),
+    water_committee = sum(has_water_committee == "Yes", na.rm = TRUE),
+    community_members = sum(has_community_members == "Yes", na.rm = TRUE),
+    institution = sum(has_institution == "Yes", na.rm = TRUE),
+    private_owner = sum(has_private_owner == "Yes", na.rm = TRUE),
+    local_govt = sum(has_local_govt == "Yes", na.rm = TRUE),
+    bush_mechanic = sum(has_bush_mechanic == "Yes", na.rm = TRUE)
+  ) %>%
+  pivot_longer(everything(), names_to = "provider", values_to = "count") %>%
+  mutate(
+    percentage = round(count/nrow(data)*100, 1),
+    provider_clean = case_when(
+      provider == "area_mechanic" ~ "Area Mechanic",
+      provider == "water_committee" ~ "Water Committee",
+      provider == "community_members" ~ "Community Members",
+      provider == "institution" ~ "Institution",
+      provider == "private_owner" ~ "Private Owner",
+      provider == "local_govt" ~ "Local Government",
+      provider == "bush_mechanic" ~ "Bush Mechanic",
+      TRUE ~ provider
+    )
+  ) %>%
+  arrange(desc(count))
+
+ggplot(provider_coverage, aes(x = reorder(provider_clean, count), y = count, fill = provider_clean)) +
+  geom_col() +
+  geom_text(aes(label = paste0(count, "\n(", percentage, "%)")), 
+            hjust = -0.1, size = 3) +
+  coord_flip() +
+  labs(title = "Service Provider Coverage Across All Water Points",
+       x = "Service Provider Type",
+       y = "Number of Water Points") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+```
+
+## 3. Problem Analysis
+
+### 3.1 Root Cause Analysis
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Problem analysis by functional status
+problem_analysis <- data %>%
+  filter(current_problem != "NA") %>%
+  group_by(functional_status, current_problem) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(functional_status) %>%
+  mutate(
+    total = sum(count),
+    percentage = round(count/total*100, 1)
+  ) %>%
+  filter(count >= 2) # Only show problems with at least 2 occurrences
+
+ggplot(problem_analysis, aes(x = current_problem, y = count, fill = functional_status)) +
+  geom_col(position = "dodge") +
+  geom_text(aes(label = count), position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+  labs(title = "Problems by Functional Status",
+       x = "Problem Type",
+       y = "Number of Water Points",
+       fill = "Functional Status") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2")
+```
+
+### 3.2 Quality Issues Impact
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Quality issues analysis
+quality_impact <- data %>%
+  filter(has_quality_issues == "Yes") %>%
+  group_by(functional_status, quality_issues_type) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  filter(count >= 1)
+
+if(nrow(quality_impact) > 0) {
+  ggplot(quality_impact, aes(x = quality_issues_type, y = count, fill = functional_status)) +
+    geom_col(position = "stack") +
+    geom_text(aes(label = count), position = position_stack(vjust = 0.5), size = 3) +
+    labs(title = "Quality Issues Impact on Functionality",
+         x = "Quality Issue Type",
+         y = "Number of Water Points",
+         fill = "Functional Status") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_fill_brewer(palette = "Set2")
+} else {
+  cat("No detailed quality issues data available for analysis.")
+}
+```
+
+## 4. Accessibility Analysis
+
+### 4.1 Household Utilization Patterns
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Household utilization analysis
+household_func <- data %>%
+  filter(households_count != "NA") %>%
+  mutate(households_num = as.numeric(households_count)) %>%
+  filter(!is.na(households_num)) %>%
+  mutate(
+    utilization_category = case_when(
+      households_num <= 20 ~ "Low (≤20)",
+      households_num <= 50 ~ "Medium (21-50)",
+      households_num <= 100 ~ "High (51-100)",
+      TRUE ~ "Very High (>100)"
+    )
+  )
+
+if(nrow(household_func) > 0) {
+  util_summary <- household_func %>%
+    group_by(utilization_category, functional_status) %>%
+    summarise(count = n(), .groups = "drop") %>%
+    group_by(utilization_category) %>%
+    mutate(
+      total = sum(count),
+      percentage = round(count/total*100, 1)
+    )
+  
+  ggplot(util_summary, aes(x = utilization_category, y = count, fill = functional_status)) +
+    geom_col(position = "stack") +
+    geom_text(aes(label = paste0(count, "\n(", percentage, "%)")), 
+              position = position_stack(vjust = 0.5), size = 3) +
+    labs(title = "Functionality by Household Utilization Level",
+         x = "Household Utilization Category",
+         y = "Number of Water Points",
+         fill = "Functional Status") +
+    theme_minimal() +
+    scale_fill_brewer(palette = "Set2")
+}
+```
+
+### 4.2 Seasonal Availability
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Seasonal analysis
+seasonal_analysis <- data %>%
+  filter(has_seasonal_variation != "NA") %>%
+  group_by(has_seasonal_variation, functional_status) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(has_seasonal_variation) %>%
+  mutate(
+    total = sum(count),
+    percentage = round(count/total*100, 1)
+  )
+
+if(nrow(seasonal_analysis) > 0) {
+  ggplot(seasonal_analysis, aes(x = has_seasonal_variation, y = count, fill = functional_status)) +
+    geom_col(position = "dodge") +
+    geom_text(aes(label = paste0(count, "\n(", percentage, "%)")), 
+              position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+    labs(title = "Seasonal Variation Impact on Functionality",
+         x = "Has Seasonal Variation",
+         y = "Number of Water Points",
+         fill = "Functional Status") +
+    theme_minimal() +
+    scale_fill_brewer(palette = "Set2")
+}
+```
+
+## 5. Key Recommendations
+
+Based on the analysis, the following recommendations are proposed:
+
+### 5.1 Immediate Actions
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Calculate metrics for recommendations
+partial_count <- sum(data$functional_status == "PARTIAL")
+not_func_count <- sum(data$functional_status == "NOT_FUNC")
+no_provider_count <- sum(data$has_service_provider == "No", na.rm = TRUE)
+quality_issues_count <- sum(data$has_quality_issues == "Yes", na.rm = TRUE)
+
+recommendations <- data.frame(
+  Priority = c("High", "High", "Medium", "Medium", "Low"),
+  Action = c(
+    "Repair partially functional water points",
+    "Establish service providers for unserved points",
+    "Rehabilitate non-functional water points",
+    "Address water quality issues",
+    "Implement preventive maintenance programs"
+  ),
+  Target = c(
+    paste(partial_count, "water points"),
+    paste(no_provider_count, "water points"),
+    paste(not_func_count, "water points"),
+    paste(quality_issues_count, "water points"),
+    "All functional water points"
+  ),
+  Expected_Impact = c(
+    "Immediate service improvement",
+    "Sustainable operations",
+    "Expanded access",
+    "Improved water safety",
+    "Long-term sustainability"
+  )
+)
+
+kable(recommendations, caption = "Priority Recommendations for Water Point Improvement")
+```
+
+### 5.2 Strategic Interventions
+
+1. **Strengthen Service Provider Networks**
+   - Expand area mechanic coverage
+   - Support water committee training
+   - Establish backup maintenance systems
+
+2. **Address Equipment Failures**
+   - Implement predictive maintenance
+   - Improve spare parts supply chains
+   - Upgrade aging infrastructure
+
+3. **Enhance Water Quality Management**
+   - Regular quality monitoring
+   - Source protection measures
+   - Treatment system upgrades
+
+4. **Improve Data Collection**
+   - Standardize reporting protocols
+   - Implement real-time monitoring
+   - Enhance community feedback systems
+
+## 6. Performance Indicators
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Key performance indicators
+kpi_data <- data %>%
+  summarise(
+    functionality_rate = round(mean(functional_status == "FUNC") * 100, 1),
+    service_coverage = round(mean(has_service_provider == "Yes", na.rm = TRUE) * 100, 1),
+    avg_households = round(mean(as.numeric(households_count[households_count != "NA"]), na.rm = TRUE), 1),
+    quality_compliance = round(mean(has_quality_issues == "No", na.rm = TRUE) * 100, 1),
+    maintenance_rate = round(mean(current_problem == "NA") * 100, 1)
+  )
+
+kpi_table <- data.frame(
+  KPI = c(
+    "Functionality Rate",
+    "Service Provider Coverage",
+    "Average Households Served",
+    "Quality Compliance Rate",
+    "Maintenance-Free Rate"
+  ),
+  Current_Value = c(
+    paste0(kpi_data$functionality_rate, "%"),
+    paste0(kpi_data$service_coverage, "%"),
+    paste0(kpi_data$avg_households, " households"),
+    paste0(kpi_data$quality_compliance, "%"),
+    paste0(kpi_data$maintenance_rate, "%")
+  ),
+  Target = c("≥85%", "≥90%", "≥50 households", "≥95%", "≥70%"),
+  Status = c(
+    ifelse(kpi_data$functionality_rate >= 85, "✅ Target Met", "❌ Below Target"),
+    ifelse(kpi_data$service_coverage >= 90, "✅ Target Met", "❌ Below Target"),
+    ifelse(kpi_data$avg_households >= 50, "✅ Target Met", "❌ Below Target"),
+    ifelse(kpi_data$quality_compliance >= 95, "✅ Target Met", "❌ Below Target"),
+    ifelse(kpi_data$maintenance_rate >= 70, "✅ Target Met", "❌ Below Target")
+  )
+)
+
+kable(kpi_table, caption = "Key Performance Indicators Dashboard")
+```
+
+---
+
+*This analysis is based on comprehensive data quality validation and standardization procedures. All findings are derived from validated field data collected through the mWater platform.*

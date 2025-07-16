@@ -1,0 +1,37 @@
+project:
+  type: website
+  title: "Water Point Functionality Survey"
+  
+website:
+  title: "Water Point Functionality Survey"
+  description: "Comprehensive analysis of water point functionality and accessibility data collected through mWater platform"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: data-overview.qmd
+        text: Data Overview
+      - href: analysis.qmd
+        text: Analysis
+      - href: methodology.qmd
+        text: Methodology
+    right:
+      - href: https://github.com/your-repo/water-point-survey
+        text: GitHub
+        icon: github
+  
+  sidebar:
+    style: floating
+    
+  page-footer:
+    left: "© 2024 Water Point Survey Project"
+    right: "Data collected via mWater platform"
+    
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-tools: true

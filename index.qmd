@@ -1,0 +1,178 @@
+---
+title: "Water Point Functionality Survey"
+subtitle: "Comprehensive Assessment of Water Infrastructure Performance"
+author: "Water Point Survey Team"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+---
+
+## Project Overview
+
+This website presents a comprehensive analysis of water point functionality data collected through the **mWater platform**. The survey was conducted to assess the operational status, accessibility, and service provision of water infrastructure across surveyed communities.
+
+### Key Objectives
+
+- **Assess water point functionality** across different geographic locations
+- **Evaluate service provider effectiveness** and maintenance systems
+- **Identify common problems** affecting water point operations
+- **Analyze water quality issues** and their prevalence
+- **Support evidence-based decision making** for water infrastructure investments
+
+## Data Collection Platform
+
+The data was collected using **mWater**, a comprehensive water monitoring platform that enables:
+
+- **Real-time data collection** through mobile devices
+- **GPS coordinate capture** for precise location mapping
+- **Photo documentation** of water point conditions
+- **Standardized survey protocols** ensuring data quality
+- **Cloud-based data storage** and management
+
+## Dataset Summary
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Load required libraries
+library(readr)
+library(dplyr)
+library(knitr)
+library(DT)
+
+# Read the processed data
+data <- read_csv("wpf_processed.csv")
+
+# Create summary statistics
+summary_stats <- data.frame(
+  Metric = c("Total Water Points", "Survey Period", "Geographic Coverage", "Data Collection Method", "Quality Assurance"),
+  Value = c(
+    paste(nrow(data), "water points"),
+    "April 2022",
+    "Regional survey area",
+    "mWater mobile platform",
+    "Multi-stage validation process"
+  )
+)
+
+kable(summary_stats, caption = "Dataset Overview")
+```
+
+## Key Findings at a Glance
+
+### Functional Status Distribution
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(ggplot2)
+
+# Functional status distribution
+func_status <- data %>%
+  count(functional_status) %>%
+  mutate(percentage = round(n/sum(n)*100, 1))
+
+ggplot(func_status, aes(x = reorder(functional_status, n), y = n, fill = functional_status)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n, "\n(", percentage, "%)")), 
+            hjust = -0.1, size = 3) +
+  coord_flip() +
+  labs(title = "Water Point Functional Status Distribution",
+       x = "Functional Status",
+       y = "Number of Water Points") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+```
+
+### Geographic Distribution
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Geographic summary
+geo_summary <- data %>%
+  summarise(
+    min_lat = min(as.numeric(latitude), na.rm = TRUE),
+    max_lat = max(as.numeric(latitude), na.rm = TRUE),
+    min_lon = min(as.numeric(longitude), na.rm = TRUE),
+    max_lon = max(as.numeric(longitude), na.rm = TRUE),
+    coverage_area = paste0(
+      "Latitude: ", round(min_lat, 2), "° to ", round(max_lat, 2), "°\n",
+      "Longitude: ", round(min_lon, 2), "° to ", round(max_lon, 2), "°"
+    )
+  )
+
+cat("**Survey Coverage Area:**\n")
+cat(geo_summary$coverage_area)
+```
+
+## Data Quality Enhancements
+
+This dataset has undergone comprehensive quality improvements:
+
+### ✅ **Standardization**
+- Functional status coded to standard categories (FUNC, PARTIAL, NOT_FUNC, ABANDONED)
+- Boolean fields standardized to consistent Yes/No format
+- Problem categories grouped into logical taxonomies
+
+### ✅ **Validation**
+- GPS coordinates validated and outliers removed
+- Household counts validated within reasonable ranges (1-500)
+- Cross-field logical consistency checks implemented
+
+### ✅ **Enhancement**
+- Multi-value service provider fields expanded to boolean indicators
+- Missing data consistently marked as "NA"
+- Date formats standardized to DD/MM/YYYY
+
+### ✅ **Documentation**
+- Comprehensive audit trail of all changes
+- Data completeness analysis conducted
+- Processing scripts provided for reproducibility
+
+## Key Variables
+
+The dataset includes the following primary variables:
+
+- **`water_point_id`**: Unique identifier for each water point
+- **`functional_status`**: Current operational status (FUNC/PARTIAL/NOT_FUNC/ABANDONED)
+- **`latitude/longitude`**: GPS coordinates for mapping
+- **`current_problem`**: Categorized problems (EQUIPMENT_FAILURE, LOW_FLOW, STRUCTURAL_ISSUE, etc.)
+- **`households_count`**: Number of households served
+- **`service_provider_type`**: Type of maintenance/operation provider
+- **`quality_issues_type`**: Water quality concerns (ODOR, SALINITY, TURBIDITY, etc.)
+- **`submitted_date`**: Survey completion date
+
+## Navigation
+
+Use the navigation bar to explore different sections:
+
+- **[Data Overview](data-overview.qmd)**: Detailed dataset statistics and distributions
+- **[Analysis](analysis.qmd)**: In-depth analysis and visualizations
+- **[Methodology](methodology.qmd)**: Survey methodology and data collection process
+
+## About mWater
+
+[mWater](https://www.mwater.co/) is a comprehensive water monitoring platform that enables organizations to:
+
+- Collect standardized water point data
+- Monitor water quality and infrastructure
+- Generate real-time reports and dashboards
+- Support evidence-based water sector planning
+- Facilitate collaboration between stakeholders
+
+This survey demonstrates the platform's capability to generate high-quality, actionable water infrastructure data for decision-making and planning purposes.
+
+---
+
+*Last updated: `r format(Sys.Date(), "%B %d, %Y")`*
