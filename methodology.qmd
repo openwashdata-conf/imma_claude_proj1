@@ -91,7 +91,7 @@ library(dplyr)
 library(knitr)
 
 # Load the data to show processing steps
-data <- read_csv("wpf_processed.csv")
+data <- read_csv("data/wpf_processed.csv")
 
 # Original data characteristics (simulated based on what we know)
 original_stats <- data.frame(
@@ -267,7 +267,7 @@ The data processing pipeline consists of PowerShell scripts for reproducibility:
 
 The processing pipeline generates:
 
-- **`wpf_processed.csv`** - Final cleaned dataset
+- **`data/wpf_processed.csv`** - Final cleaned dataset
 - **`gps_outliers.csv`** - GPS coordinate outliers (if any)
 - **`invalid_household_counts.csv`** - Invalid household counts (if any)
 - **`logical_inconsistencies.csv`** - Logical inconsistencies log

@@ -23,7 +23,7 @@ library(ggplot2)
 library(plotly)
 
 # Read the processed data
-data <- read_csv("wpf_processed.csv")
+data <- read_csv("data/wpf_processed.csv")
 
 # Dataset structure
 cat("**Dataset Dimensions:**\n")

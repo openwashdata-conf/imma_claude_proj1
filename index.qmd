@@ -46,7 +46,7 @@ library(knitr)
 library(DT)
 
 # Read the processed data
-data <- read_csv("wpf_processed.csv")
+data <- read_csv("data/wpf_processed.csv")
 
 # Create summary statistics
 summary_stats <- data.frame(
@@ -99,21 +99,101 @@ ggplot(func_status, aes(x = reorder(functional_status, n), y = n, fill = functio
 #| message: false
 #| warning: false
 
-# Geographic summary
-geo_summary <- data %>%
-  summarise(
-    min_lat = min(as.numeric(latitude), na.rm = TRUE),
-    max_lat = max(as.numeric(latitude), na.rm = TRUE),
-    min_lon = min(as.numeric(longitude), na.rm = TRUE),
-    max_lon = max(as.numeric(longitude), na.rm = TRUE),
-    coverage_area = paste0(
-      "Latitude: ", round(min_lat, 2), "° to ", round(max_lat, 2), "°\n",
-      "Longitude: ", round(min_lon, 2), "° to ", round(max_lon, 2), "°"
+library(leaflet)
+library(plotly)
+
+# Convert coordinates to numeric
+data <- data %>%
+  mutate(
+    lat = as.numeric(latitude),
+    lon = as.numeric(longitude)
+  ) %>%
+  filter(!is.na(lat), !is.na(lon))
+
+# Create interactive map
+map <- leaflet(data) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    lng = ~lon, 
+    lat = ~lat,
+    color = ~case_when(
+      functional_status == "FUNC" ~ "green",
+      functional_status == "PARTIAL" ~ "orange", 
+      functional_status == "NOT_FUNC" ~ "red",
+      TRUE ~ "gray"
+    ),
+    radius = 5,
+    fillOpacity = 0.8,
+    popup = ~paste0(
+      "<b>Water Point ID:</b> ", water_point_id, "<br>",
+      "<b>Status:</b> ", functional_status, "<br>",
+      "<b>Households:</b> ", households_count, "<br>",
+      "<b>Problem:</b> ", current_problem
     )
+  ) %>%
+  addLegend(
+    "bottomright",
+    colors = c("green", "orange", "red", "gray"),
+    labels = c("Functional", "Partial", "Not Functional", "Other"),
+    title = "Water Point Status"
   )
 
-cat("**Survey Coverage Area:**\n")
-cat(geo_summary$coverage_area)
+map
+```
+
+### Service Provider Distribution
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Service provider analysis
+service_data <- data %>%
+  filter(!is.na(service_provider_type), service_provider_type != "NA") %>%
+  count(service_provider_type, sort = TRUE) %>%
+  head(8)
+
+p1 <- ggplot(service_data, aes(x = reorder(service_provider_type, n), y = n, fill = service_provider_type)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Water Point Service Providers",
+       x = "Service Provider Type",
+       y = "Number of Water Points") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+
+ggplotly(p1)
+```
+
+### Problems by Functionality Status
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Problem analysis
+problem_data <- data %>%
+  filter(!is.na(current_problem), current_problem != "NA") %>%
+  count(functional_status, current_problem) %>%
+  group_by(functional_status) %>%
+  slice_max(n, n = 3) %>%
+  ungroup()
+
+p2 <- ggplot(problem_data, aes(x = reorder(current_problem, n), y = n, fill = functional_status)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~functional_status, scales = "free") +
+  labs(title = "Most Common Problems by Functional Status",
+       x = "Problem Type",
+       y = "Number of Water Points") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+
+ggplotly(p2)
 ```
 
 ## Data Quality Enhancements

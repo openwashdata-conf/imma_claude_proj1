@@ -26,7 +26,7 @@ library(plotly)
 library(scales)
 
 # Read the processed data
-data <- read_csv("wpf_processed.csv")
+data <- read_csv("data/wpf_processed.csv")
 
 # Key metrics for executive summary
 exec_summary <- data %>%

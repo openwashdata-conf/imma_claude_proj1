@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Point Functionality Survey</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #4a90e2;
+            --accent-color: #87ceeb;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+            font-size: 1.3rem;
+        }
+        
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-section h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-section .lead {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .section-title {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            border-left: 4px solid var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-tint"></i> Water Point Survey
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#overview">Overview</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#data">Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#methodology">Methodology</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#insights">Insights</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1>Water Point Functionality Survey</h1>
+                    <p class="lead">Comprehensive Assessment of Water Infrastructure Performance</p>
+                    <p>This website presents a comprehensive analysis of water point functionality data collected through the <strong>mWater platform</strong>. The survey was conducted to assess the operational status, accessibility, and service provision of water infrastructure across surveyed communities.</p>
+                </div>
+                <div class="col-lg-4">
+                    <div class="text-center">
+                        <i class="fas fa-water fa-8x" style="color: rgba(255,255,255,0.3);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section id="overview" class="container mb-5">
+        <h2 class="section-title">Key Findings at a Glance</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-value">100+</span>
+                    <div class="metric-label">Water Points Surveyed</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-value">75%</span>
+                    <div class="metric-label">Functional Status</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-value">85%</span>
+                    <div class="metric-label">Have Service Providers</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-value">45</span>
+                    <div class="metric-label">Avg Households Served</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Collection Platform -->
+    <section id="data" class="container mb-5">
+        <h2 class="section-title">Data Collection Platform</h2>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="alert alert-info">
+                    <h4><i class="fas fa-mobile-alt"></i> mWater Platform</h4>
+                    <p>The data was collected using <strong>mWater</strong>, a comprehensive water monitoring platform that enables:</p>
+                    <ul>
+                        <li><strong>Real-time data collection</strong> through mobile devices</li>
+                        <li><strong>GPS coordinate capture</strong> for precise location mapping</li>
+                        <li><strong>Photo documentation</strong> of water point conditions</li>
+                        <li><strong>Standardized survey protocols</strong> ensuring data quality</li>
+                        <li><strong>Cloud-based data storage</strong> and management</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <i class="fas fa-chart-line feature-icon"></i>
+                    <h4>Data Quality</h4>
+                    <p>Comprehensive 8-step quality improvement process implemented</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features -->
+    <section id="methodology" class="container mb-5">
+        <h2 class="section-title">Data Quality Enhancements</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    <h4>Standardization</h4>
+                    <p>Functional status coded to standard categories, boolean fields standardized, problem categories grouped logically</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-map-marked-alt feature-icon"></i>
+                    <h4>Validation</h4>
+                    <p>GPS coordinates validated, household counts validated, cross-field logical consistency checks implemented</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-tools feature-icon"></i>
+                    <h4>Enhancement</h4>
+                    <p>Multi-value fields expanded, missing data standardized, comprehensive audit trail maintained</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Variables -->
+    <section class="container mb-5">
+        <h2 class="section-title">Key Variables</h2>
+        <div class="row">
+            <div class="col-lg-6">
+                <h4>Core Variables</h4>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>water_point_id</strong>: Unique identifier for each water point</li>
+                    <li class="list-group-item"><strong>functional_status</strong>: Current operational status (FUNC/PARTIAL/NOT_FUNC/ABANDONED)</li>
+                    <li class="list-group-item"><strong>latitude/longitude</strong>: GPS coordinates for mapping</li>
+                    <li class="list-group-item"><strong>households_count</strong>: Number of households served</li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <h4>Service & Quality Variables</h4>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>current_problem</strong>: Categorized problems (EQUIPMENT_FAILURE, LOW_FLOW, etc.)</li>
+                    <li class="list-group-item"><strong>service_provider_type</strong>: Type of maintenance/operation provider</li>
+                    <li class="list-group-item"><strong>quality_issues_type</strong>: Water quality concerns (ODOR, SALINITY, etc.)</li>
+                    <li class="list-group-item"><strong>submitted_date</strong>: Survey completion date</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Insights -->
+    <section id="insights" class="container mb-5">
+        <h2 class="section-title">Key Insights & Recommendations</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-wrench"></i> Service Provider Impact</h5>
+                        <p class="card-text">Water points with active service providers show significantly higher functionality rates, emphasizing the importance of maintenance systems.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-exclamation-triangle"></i> Common Problems</h5>
+                        <p class="card-text">Equipment failure is the most common issue, followed by low flow problems, indicating need for preventive maintenance programs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-tint"></i> Quality Concerns</h5>
+                        <p class="card-text">Water quality issues, particularly salinity and turbidity, affect functionality and require targeted interventions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-users"></i> Community Access</h5>
+                        <p class="card-text">Household utilization patterns show varying access levels, with opportunities for optimization and expansion.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About mWater -->
+    <section class="container mb-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="text-center">
+                    <h2 class="section-title">About mWater</h2>
+                    <p class="lead">mWater is a comprehensive water monitoring platform that enables organizations to collect standardized water point data, monitor water quality and infrastructure, generate real-time reports and dashboards, and support evidence-based water sector planning.</p>
+                    <p>This survey demonstrates the platform's capability to generate high-quality, actionable water infrastructure data for decision-making and planning purposes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Water Point Survey Project</h5>
+                    <p>Comprehensive assessment of water infrastructure performance using mWater platform data collection.</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Data Quality</h5>
+                    <p>All data has undergone comprehensive quality assurance procedures including validation, standardization, and logical consistency checks.</p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2024 Water Point Survey Project</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>Data collected via mWater platform</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add some interactivity to metric cards
+        document.querySelectorAll('.metric-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
